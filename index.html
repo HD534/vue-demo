@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="title">
+            {{title}}
+        </div>
+
+        <div class="content">
+            {{content}}
+        </div>
+
+        <div style="margin-top:50px;">
+             <!-- show when index != 0 -->
+            <a v-if="index > 0" class="arrow_left" @click="changeIndex(-1)">pre</a>
+
+            <div class="menuItem">
+                <span class="number">index is : {{ index +1 }} | </span>
+                <span class="type"> type is : {{ currentMenu.type }} | </span>
+                <a class="menuTitle" target="vue-iron">
+                    current menu title: {{ currentMenu.title }}
+                </a>
+            </div>
+
+            <!-- show when index < menuLength -->
+            <a v-if="index < menuLength-1" class="arrow_right" v-on:click="changeIndex(1)">next</a>
+        </div>
+
+    </div>
+</body>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js'></script>
+
+<script>
+    let data = {
+        title: 'this is title',
+        content: 'this is content',
+        index: 0,
+        menu: [
+            { type: "type1", title: "title1", link: ""},
+            { type: "type2", title: "title2", link: ""},
+            { type: "type3", title: "title3", link: ""},
+        ]
+    }
+
+    let vm = new Vue({
+        el: '#app',
+        data: data,
+        computed: {
+            currentMenu(){
+                return this.menu[this.index]
+            },
+            menuLength(){
+                return this.menu.length
+            }
+            
+        },
+        methods: {
+            changeIndex(change) {
+                this.index = (this.index + change + this.menuLength) % this.menuLength;
+            }
+        }
+    })
+
+
+</script>
+
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .content {
+            margin-top: 10px;
+        }
+
+        thead {
+            color: green;
+        }
+
+        tbody {
+            color: blue;
+            height: 50px
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="containner">
+            <div class="title">
+                <div class="input">
+                    <input type="text" placeholder="name" v-model.trim="input.name" />
+                    <input type="text" placeholder="e-mail" v-model.trim="input.email" />
+                    <button @click="save">save</button>
+                    <button @click="clearData">cancel</button>
+                </div>
+                <section v-if="loading">
+                    Loading...
+                </section>
+                <section v-else>
+                    <div class="content">
+                        <table border="1" style="padding: 5px;">
+                            <thead>
+                                <tr>
+                                    <th>id</th>
+                                    <th>name</th>
+                                    <th>email</th>
+                                    <th>action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr v-for="item in contracts">
+                                    <td> {{ item.id }} </td>
+                                    <td> {{ item.name }} </td>
+                                    <td> {{ item.email }} </td>
+                                    <td>
+                                        <button @click="edit(item)">edit</button>
+                                        <button @click="deleteHanlder(item)">delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js'></script>
+    <script>
+
+        ; (function (Vue) {
+            new Vue({
+                el: "#app",
+                data: {
+                    loading: false,
+                    contracts: [],
+                    input: {
+                        "name": "",
+                        "email": ""
+                    },
+                    isEdit: false,
+                    editId: null
+                },
+                methods: {
+                    getAllData() {
+                        axios.get('http://localhost:8888/contract')
+                            .then((res) => {
+                                console.log(res)
+                                this.contracts = res.data;
+                                this.loading = false;
+                            })
+                            .catch((err) => {
+                                console.log(err)
+                            })
+                    },
+                    save() {
+                        let { name, email } = this.input;
+                        if (!name || !email) return;
+
+                        if (this.isEdit) {
+                            axios.put(`http://localhost:8888/contract/${this.editId}`, this.input)
+                                .then((res) => {
+                                    this.loading = true;
+                                    this.clearData()
+                                    // this.getAllData()
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                })
+                        } else {
+                            axios.post("http://localhost:8888/contract", this.input)
+                                .then((res) => {
+                                    this.loading = true;
+                                    this.clearData()
+                                    // this.getAllData()
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                })
+                        }
+                    },
+                    clearData() {
+                        this.input.name = ''
+                        this.input.email = ''
+                        this.editId = null;
+                        this.isEdit = false;
+                    },
+                    deleteHanlder(item) {
+                        console.log(item)
+                        let { name, id } = item;
+                        if (confirm(`do you want to delete ${name} ?`)) {
+                            axios.delete(`http://localhost:8888/contract/${id}`)
+                                .then((res) => {
+                                    this.loading = true;
+                                    consoel.log(res)
+                                    // this.getAllData()
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                })
+                        }
+                    },
+                    edit(item) {
+                        this.editId = item.id
+                        this.isEdit = true;
+                        this.input = {
+                            name: item.name,
+                            email: item.email
+                        }
+                    }
+                },
+                mounted() {
+                    this.loading = true;
+                    this.getAllData();
+                }
+            })
+        })(Vue)
+
+    </script>
+</body>
+
+</html>
